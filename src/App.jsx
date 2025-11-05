@@ -1,28 +1,43 @@
-import { useState } from 'react'
+import { useMemo, useState } from "react";
+import Header from "./components/Header";
+import Hero from "./components/Hero";
+import RestaurantGrid from "./components/RestaurantGrid";
+import CartSummary from "./components/CartSummary";
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const categories = useMemo(() => ["All", "Pizza", "Burgers", "Sushi", "Indian", "Desserts", "Vegan"], []);
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [cart, setCart] = useState([]);
+
+  const handleAddToCart = (item) => {
+    setCart((prev) => [...prev, { ...item, qty: 1 }]);
+  };
+
+  const handleCheckout = () => {
+    const total = cart.reduce((sum, i) => sum + i.price * (i.qty ?? 1), 0);
+    alert(`Checkout successful! Total: $${total.toFixed(2)} for ${cart.length} item${cart.length === 1 ? "" : "s"}.`);
+    setCart([]);
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center">
-      <div className="bg-white p-8 rounded-lg shadow-lg">
-        <h1 className="text-3xl font-bold text-gray-800 mb-4">
-          Vibe Coding Platform
-        </h1>
-        <p className="text-gray-600 mb-6">
-          Your AI-powered development environment
-        </p>
-        <div className="text-center">
-          <button
-            onClick={() => setCount(count + 1)}
-            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded"
-          >
-            Count is {count}
-          </button>
-        </div>
-      </div>
+    <div className="min-h-screen bg-gradient-to-b from-white to-orange-50/40 text-gray-900">
+      <Header cartCount={cart.length} />
+      <Hero
+        categories={categories}
+        selectedCategory={selectedCategory}
+        onSelectCategory={setSelectedCategory}
+        onSearch={setSearchQuery}
+      />
+      <RestaurantGrid
+        selectedCategory={selectedCategory}
+        searchQuery={searchQuery}
+        onAdd={handleAddToCart}
+      />
+      <CartSummary items={cart} onCheckout={handleCheckout} />
+      <footer className="py-10 text-center text-sm text-gray-500">
+        © {new Date().getFullYear()} FoodDrop. Bon appétit!
+      </footer>
     </div>
-  )
+  );
 }
-
-export default App
